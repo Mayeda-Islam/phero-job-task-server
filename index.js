@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 var cors = require("cors");
 app.use(cors());
@@ -23,6 +23,21 @@ async function run() {
       const date = new Date().toLocaleTimeString("en-US");
       const userPost = { ...body, date };
       const result = await socialPostCollection.insertOne(userPost);
+      res.send(result);
+    });
+    app.patch("/social-status/:id", async (req, res) => {
+      const id = req.params.id;
+      const likeByUser = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const result = await socialPostCollection.updateOne(filter, {
+        $addToSet: { likeByUser },
+      });
+      res.send(result);
+    });
+    app.get("/social-status/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await socialPostCollection.findOne(filter);
       res.send(result);
     });
     app.get("/social-status", async (req, res) => {
